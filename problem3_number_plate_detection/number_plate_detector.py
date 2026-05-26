@@ -1,18 +1,18 @@
 """
-Problem 3 — Hard: Number Plate Detection
+Problem 3 - Hard: Number Plate Detection
 =========================================
 Detects visible number plates in video/images and reads the plate text.
 
 Expected Output (per detection):
     - Bounding box  : [x, y, width, height] in pixels
     - Plate text    : alphanumeric string read via OCR
-    - Confidence    : float 0.0 – 1.0 from EasyOCR
+    - Confidence    : float 0.0 - 1.0 from EasyOCR
 
 Handles:
-    - Angled plates          → contour approxPolyDP + perspective correction
-    - Partial occlusion      → two detection methods combined (cascade + contour)
-    - Varying lighting       → bilateral filter + CLAHE preprocessing
-    - Multiple plates/frame  → all candidates evaluated; IoU-based deduplication
+    - Angled plates          -> contour approxPolyDP + perspective correction
+    - Partial occlusion      -> two detection methods combined (cascade + contour)
+    - Varying lighting       -> bilateral filter + CLAHE preprocessing
+    - Multiple plates/frame  -> all candidates evaluated; IoU-based deduplication
 
 Stack:
     - opencv-python   : preprocessing, contour detection, drawing
@@ -37,8 +37,8 @@ Usage:
     # Custom output
     python number_plate_detector.py input_video.mp4 -o detected.mp4
 
-Time Complexity  (per frame): O(H × W) preprocessing + O(k) OCR candidates
-Space Complexity (per frame): O(H × W) frame buffer
+Time Complexity  (per frame): O(H x W) preprocessing + O(k) OCR candidates
+Space Complexity (per frame): O(H x W) frame buffer
 """
 
 import cv2
@@ -78,11 +78,11 @@ class NumberPlateDetector:
     """
     Two-stage license plate detection and OCR pipeline.
 
-    Stage 1 — Detection:
+    Stage 1 - Detection:
         • Haar cascade  (haarcascade_russian_plate_number.xml)
         • Contour-based aspect-ratio filter  (fallback / complement)
 
-    Stage 2 — OCR:
+    Stage 2 - OCR:
         • EasyOCR on the cropped plate ROI (after perspective correction)
     """
 
@@ -94,7 +94,7 @@ class NumberPlateDetector:
         self.reader = easyocr.Reader(languages, gpu=gpu)
         print("[INFO] EasyOCR ready.")
 
-        # Haar cascade — bundled with OpenCV
+        # Haar cascade - bundled with OpenCV
         cascade_path = os.path.join(
             cv2.data.haarcascades, "haarcascade_russian_plate_number.xml"
         )
@@ -103,7 +103,7 @@ class NumberPlateDetector:
             print(f"[INFO] Haar cascade loaded: {cascade_path}")
         else:
             self.cascade = None
-            print("[WARN] Haar cascade not found — using contour-only detection.")
+            print("[WARN] Haar cascade not found - using contour-only detection.")
 
     # ------------------------------------------------------------------
     # Preprocessing
@@ -120,7 +120,7 @@ class NumberPlateDetector:
         return clahe.apply(denoised)
 
     # ------------------------------------------------------------------
-    # Detection — Method 1: Haar cascade
+    # Detection - Method 1: Haar cascade
     # ------------------------------------------------------------------
 
     def _detect_cascade(self, gray: np.ndarray) -> list:
@@ -136,7 +136,7 @@ class NumberPlateDetector:
         return [tuple(p) for p in plates] if len(plates) else []
 
     # ------------------------------------------------------------------
-    # Detection — Method 2: Contour + aspect-ratio filter
+    # Detection - Method 2: Contour + aspect-ratio filter
     # ------------------------------------------------------------------
 
     def _detect_contour(self, frame: np.ndarray, gray: np.ndarray) -> list:
@@ -381,7 +381,7 @@ def process_image(detector: NumberPlateDetector,
 
     annotated = detector.draw(frame.copy(), detections)
     cv2.imwrite(output_path, annotated)
-    print(f"[INFO] Saved → {output_path}")
+    print(f"[INFO] Saved -> {output_path}")
 
     if save_json:
         _save_json({"file": input_path, "detections": detections}, output_path)
@@ -403,7 +403,7 @@ def process_video(detector: NumberPlateDetector,
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
-    print(f"[INFO] Video: {width}×{height} @ {fps:.1f} fps — {total} frames")
+    print(f"[INFO] Video: {width}x{height} @ {fps:.1f} fps - {total} frames")
 
     all_detections = {}
     frame_num = 0
@@ -425,13 +425,13 @@ def process_video(detector: NumberPlateDetector,
             pct = (frame_num / total * 100) if total else 0
             plates_str = ", ".join(
                 f"'{d['text']}' ({d['confidence']:.2f})" for d in detections
-            ) or "—"
+            ) or "-"
             print(f"[INFO] Frame {frame_num}/{total} ({pct:.0f}%) | "
                   f"Plates: {plates_str}")
 
     cap.release()
     out.release()
-    print(f"[INFO] Saved → {output_path}")
+    print(f"[INFO] Saved -> {output_path}")
 
     if save_json:
         _save_json({"file": input_path, "frames": all_detections}, output_path)
@@ -449,11 +449,19 @@ def _print_detections(detections: list) -> None:
               f"BBox: {d['bbox']}")
 
 
+class _NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer): return int(obj)
+        if isinstance(obj, np.floating): return float(obj)
+        if isinstance(obj, np.ndarray): return obj.tolist()
+        return super().default(obj)
+
+
 def _save_json(data: dict, output_path: str) -> None:
     json_path = Path(output_path).with_suffix(".json")
     with open(json_path, "w") as f:
-        json.dump(data, f, indent=2)
-    print(f"[INFO] JSON results → {json_path}")
+        json.dump(data, f, indent=2, cls=_NumpyEncoder)
+    print(f"[INFO] JSON results -> {json_path}")
 
 
 def _auto_output(input_path: str, user_output: str | None) -> str:
@@ -469,7 +477,7 @@ def _auto_output(input_path: str, user_output: str | None) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Number Plate Detection — OpenCV + EasyOCR"
+        description="Number Plate Detection - OpenCV + EasyOCR"
     )
     parser.add_argument("input", help="Input video or image path")
     parser.add_argument("-o", "--output", default=None,
