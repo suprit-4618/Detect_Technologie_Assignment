@@ -70,17 +70,17 @@ def run_tests():
     all_passed = True
     for i, (inp, expected, desc) in enumerate(test_cases, 1):
         result = move_zeros_to_right(inp.copy())
-        status = "PASS ✓" if result == expected else "FAIL ✗"
+        status = "PASS" if result == expected else "FAIL"
         if result != expected:
             all_passed = False
-        print(f"Test {i:2d} [{status}] {desc}")
+        print(f"Test {i:2d} [{status:<4}] {desc}")
         if result != expected:
             print(f"         Input:    {inp}")
             print(f"         Expected: {expected}")
             print(f"         Got:      {result}")
 
     print("-" * 60)
-    print("All tests PASSED ✓" if all_passed else "Some tests FAILED ✗")
+    print("All tests PASSED" if all_passed else "Some tests FAILED")
     print("=" * 60)
 
     # Complexity summary
