@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.so
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# EasyOCR / model weights (large files — do not commit)
+*.pth
+*.pt
+*.caffemodel
+*.prototxt
+*.weights
+*.onnx
+
+# Videos and images (submit separately via ZIP)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.flv
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+*.webp
+
+# IDE / OS
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
