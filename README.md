@@ -1,6 +1,6 @@
 # Detect Technologies — Technical Assessment
 
-**Candidate:** [Your Name]
+**Candidate:** Suprit Lenkennavar
 **Company:** Detect Technologies — TAP-JOB-ID-2507
 **Deadline:** Thursday, 28-05-2026, 11:00 AM
 
@@ -54,5 +54,4 @@ See [`problem3_number_plate_detection/README.md`](problem3_number_plate_detectio
 
 ## Notes
 - Problems 2 & 3 accept both **video files** and **static images**.
-- Candidates may use Google Colab or any shareable online editor.
 - Institute/Academy name: **TAP Academy**
