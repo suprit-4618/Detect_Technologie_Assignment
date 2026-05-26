@@ -389,7 +389,13 @@ def process_image(detector: NumberPlateDetector,
 
 def process_video(detector: NumberPlateDetector,
                   input_path: str, output_path: str,
-                  save_json: bool) -> None:
+                  save_json: bool, skip_frames: int = 5) -> None:
+    """
+    Process a video file for number plate detection.
+
+    skip_frames: Run OCR every N frames; re-use last result for in-between
+    frames. This is standard practice for real-time ANPR on CPU.
+    """
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
         print(f"[ERROR] Cannot open video: {input_path}")
@@ -404,9 +410,11 @@ def process_video(detector: NumberPlateDetector,
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     print(f"[INFO] Video: {width}x{height} @ {fps:.1f} fps - {total} frames")
+    print(f"[INFO] OCR running every {skip_frames} frames (CPU optimisation)")
 
     all_detections = {}
     frame_num = 0
+    last_detections = []
 
     while True:
         ret, frame = cap.read()
@@ -414,7 +422,11 @@ def process_video(detector: NumberPlateDetector,
             break
         frame_num += 1
 
-        detections = detector.detect(frame)
+        # Run full detection every skip_frames; reuse result in between
+        if frame_num % skip_frames == 1:
+            last_detections = detector.detect(frame)
+        detections = last_detections
+
         if detections:
             all_detections[frame_num] = detections
 
@@ -488,6 +500,8 @@ def main():
                         help="Use GPU for EasyOCR (requires CUDA)")
     parser.add_argument("--lang", nargs="+", default=["en"],
                         help="EasyOCR language codes (default: en)")
+    parser.add_argument("--skip-frames", type=int, default=5,
+                        help="Run OCR every N frames (default: 5, use 1 for every frame)")
     args = parser.parse_args()
 
     if not os.path.exists(args.input):
@@ -501,7 +515,7 @@ def main():
     if ext in IMAGE_EXTS:
         process_image(detector, args.input, output_path, args.json)
     elif ext in VIDEO_EXTS:
-        process_video(detector, args.input, output_path, args.json)
+        process_video(detector, args.input, output_path, args.json, skip_frames=args.skip_frames)
     else:
         print(f"[ERROR] Unsupported file type: {ext}")
         sys.exit(1)
